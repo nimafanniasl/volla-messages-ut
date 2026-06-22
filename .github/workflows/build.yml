@@ -1,0 +1,48 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          sudo apt --yes install adb git python3 pipx python3-setuptools
+          pipx install clickable-ut
+          clickable setup --arch arm64 --non-interactive
+
+      - name: Build click file
+        run: |
+          clickable build --arch arm64 --skip-review
+
+      - name: Find click file
+        run: |
+          CLICK_FILE=$(find build -name "*.click" | head -n 1)
+          if [ -z "$CLICK_FILE" ]; then
+              echo "No .click file found!"
+              exit 1
+          fi
+          echo "CLICK_FILE=$CLICK_FILE" >> "$GITHUB_ENV"
+
+      - name: Create Version Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ env.CLICK_FILE }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
