@@ -70,7 +70,7 @@ aarch64-linux-gnu-gcc \
     -ldl
 
 echo "[+] Downloading & Installing NoCSD Patch..."
-rm -r libgtk-nocsd0*
+rm -r libgtk-nocsd0* || true
 
 # This is in the 26.04 repos, so we need to download it manually
 wget "https://mirrors.edge.kernel.org/ubuntu/pool/universe/g/gtk-nocsd/libgtk-nocsd0_3+0~20260321+0b77e1b-1_arm64.deb"
